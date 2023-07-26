@@ -58,19 +58,14 @@ exports.login = async (req, res, next) => {
 
 exports.protect = async (req, res, next) => {
   let token;
-    if (req.headers.authorization) {
-      token = req.get("Authorization").split(" ")[1];
-    }
+  if (req.headers.authorization) {
+    token = req.get("Authorization").split(" ")[1];
+  }
   try {
-    
     if (!token)
       return next(new AppError("You are not authorized, please login", 401));
-  
 
-    const { userId} = jwt.verify(
-      token,
-      process.env.JSON_WEB_TOKEN_SECRET
-    );
+    const { userId } = jwt.verify(token, process.env.JSON_WEB_TOKEN_SECRET);
 
     //if verified, query user with id in payload and check if user is there
     const user = await User.findById(userId);
@@ -83,4 +78,28 @@ exports.protect = async (req, res, next) => {
   }
 };
 
-exports.updateMe = async (req, res, next) => {};
+exports.updateMe = async (req, res, next) => {
+  try {
+    const { name, email } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { name, email },
+      { runValidators: true, new: true }
+    );
+
+    res.status(200).json({ status: "success", user: updatedUser });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deactivateMe = async (req, res, next) => {
+  try {
+    await User.findByIdAndUpdate(req.user._id, { active: false });
+    res.status(204).json({ status: "success", message: "user deactivated" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
