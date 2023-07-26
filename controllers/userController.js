@@ -55,3 +55,32 @@ exports.login = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.protect = async (req, res, next) => {
+  let token;
+    if (req.headers.authorization) {
+      token = req.get("Authorization").split(" ")[1];
+    }
+  try {
+    
+    if (!token)
+      return next(new AppError("You are not authorized, please login", 401));
+  
+
+    const { userId} = jwt.verify(
+      token,
+      process.env.JSON_WEB_TOKEN_SECRET
+    );
+
+    //if verified, query user with id in payload and check if user is there
+    const user = await User.findById(userId);
+    if (!user) return next(new AppError("User no longer exist", 401));
+
+    req.user = user;
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateMe = async (req, res, next) => {};

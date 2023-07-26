@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
       message: "password must be same",
     },
   },
+  active:{
+    type:Boolean,
+    default:true
+  }
 });
 
 //METHOD
