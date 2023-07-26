@@ -102,4 +102,18 @@ exports.deactivateMe = async (req, res, next) => {
   }
 };
 
+exports.getAll = async (req, res, next) => {
+  let { page, limit, search } = req.query;
 
+  page = page || 1;
+  limit = limit || 4;
+  let skip = (page - 1) * limit;
+  try {
+    const users = await User.find({ name:{$regex:search, $options:'i'} })
+      .limit(limit)
+      .skip(skip);
+    res.status(200).json({ status: "success", results: users.length, users });
+  } catch (err) {
+    next(err);
+  }
+};
