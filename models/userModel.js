@@ -43,6 +43,9 @@ const userSchema = new mongoose.Schema({
   }
 });
 
+//Indexing
+userSchema.index({name:1})
+
 //METHOD
 userSchema.methods.isComparable = async function(inputPass, hasedPass){
     return await bcrypt.compare(inputPass,hasedPass)
