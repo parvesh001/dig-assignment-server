@@ -109,21 +109,35 @@ exports.getAll = async (req, res, next) => {
   limit = limit || 4;
   let skip = (page - 1) * limit;
   try {
-    const users = await User.find({ name: { $regex: search || '', $options: "i" } })
+    const totalDocs = await User.countDocuments({
+      name: { $regex: search || "", $options: "i" },
+    });
+    const users = await User.find({
+      name: { $regex: search || "", $options: "i" },
+    })
       .limit(limit)
-      .skip(skip).select('name email');
-    res.status(200).json({ status: "success", results: users.length, users });
+      .skip(skip)
+      .select("name email");
+
+    const totalPages = Math.ceil(totalDocs / limit);
+
+    res
+      .status(200)
+      .json({ status: "success", results: users.length, users, totalPages });
   } catch (err) {
     next(err);
   }
 };
 
 exports.getSuggestions = async (req, res, next) => {
-  let { keys } = req.query;
+  let { keys, page, limit } = req.query;
+  page = page || 1;
+  limit = limit || 4;
+  let skip = (page-1) * limit
   try {
     const suggestions = await User.find({
       name: { $regex: keys, $options: "i" },
-    }).select("name");
+    }).skip(skip).select("name");
     res
       .status(200)
       .json({ status: "success", results: suggestions.length, suggestions });
