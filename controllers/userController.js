@@ -109,10 +109,24 @@ exports.getAll = async (req, res, next) => {
   limit = limit || 4;
   let skip = (page - 1) * limit;
   try {
-    const users = await User.find({ name:{$regex:search, $options:'i'} })
+    const users = await User.find({ name: { $regex: search || '', $options: "i" } })
       .limit(limit)
-      .skip(skip);
+      .skip(skip).select('name email');
     res.status(200).json({ status: "success", results: users.length, users });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getSuggestions = async (req, res, next) => {
+  let { keys } = req.query;
+  try {
+    const suggestions = await User.find({
+      name: { $regex: keys, $options: "i" },
+    }).select("name");
+    res
+      .status(200)
+      .json({ status: "success", results: suggestions.length, suggestions });
   } catch (err) {
     next(err);
   }
