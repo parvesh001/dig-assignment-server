@@ -20,7 +20,12 @@ To get started with the web service locally, follow these steps:
 2. Navigate to the project directory.
 3. Install dependencies.
 4. Configure the start script inside package.json file.
-5. Configure environment variables: **MONGO_DATABASE** = mongo uri, **MONGO_USER_PASSWORD** = mongo uri user password, **JSON_WEB_TOKEN_SECRET** = json secret to create signature, **JSON_WEB_TOKEN_EXPIRESIN** = json token expire time.
-6. Start the service.
+5. Configure environment variables:
+    - **PORT**= server port must be 8080 as i configured it in front-end.
+    -  **MONGO_DATABASE** = mongo uri
+    -   **MONGO_USER_PASSWORD** = mongo uri user password
+    -    **JSON_WEB_TOKEN_SECRET** = json secret to create signature
+    -    **JSON_WEB_TOKEN_EXPIRESIN** = json token expire time.
+7. Start the service.
 
 NOTE: Do not forget to create your own cluster in MongoDB.
