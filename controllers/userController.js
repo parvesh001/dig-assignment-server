@@ -39,7 +39,8 @@ exports.login = async (req, res, next) => {
 
     const user = await User.findOne({ email }).select("+password");
     if (!user) return next(new AppError("Wrong email or password", 401));
-
+    if (!user.active)
+      return next(new AppError("No user found with this email", 404));
     const isComparable = await user.isComparable(password, user.password);
     if (!isComparable)
       return next(new AppError("Wrong email or password", 401));
@@ -113,7 +114,12 @@ exports.getAll = async (req, res, next) => {
       name: { $regex: search || "", $options: "i" },
     });
     const users = await User.find({
-      name: { $regex: search || "", $options: "i" },
+      $and: [
+        {
+          name: { $regex: search || "", $options: "i" },
+          active: true,
+        },
+      ],
     })
       .limit(limit)
       .skip(skip)
@@ -133,11 +139,18 @@ exports.getSuggestions = async (req, res, next) => {
   let { keys, page, limit } = req.query;
   page = page || 1;
   limit = limit || 4;
-  let skip = (page-1) * limit
+  let skip = (page - 1) * limit;
   try {
     const suggestions = await User.find({
-      name: { $regex: keys, $options: "i" },
-    }).skip(skip).select("name");
+      $and: [
+        {
+          name: { $regex: keys, $options: "i" },
+          active: true,
+        },
+      ],
+    })
+      .skip(skip)
+      .select("name");
     res
       .status(200)
       .json({ status: "success", results: suggestions.length, suggestions });
